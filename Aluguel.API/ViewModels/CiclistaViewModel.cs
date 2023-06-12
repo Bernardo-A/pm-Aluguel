@@ -2,57 +2,35 @@ namespace Aluguel.API.ViewModels
 {
     public class CiclistaViewModel
     {
-        public int id;
-        public string nome;
-        public string dataNascimento;
-        public string cpf;
+        public int Id { get; set; }
+        public string? Nome { get; set; }
+        public string? DataNascimento { get; set; }
+        public string? CPF { get; set; }
 
-        public class Passaporte
-        {
-            public string numero;
-            public string validade;
-            public string pais;
-        }
+        public PassaporteViewModel? Passaporte { get; set; }
 
-        public string nacionalidade;
-        public string email;
-        public string urlFotoDocumento;
-        public string senha;
+        public string? Nacionalidade { get; set; }
+        public string? Email { get; set; }
+        public string? UrlFotoDocumento { get; set; }
+        public string? Senha { get; set; }
 
-        public class MeioDePagamento
-        {
-            public string nomeTitular;
-            public string numero;
-            public string validade;
-            public string cvv;
-        }
+        public  MeioDePagamentoViewModel? MeioDePagamento { get; set; }
 
-        public bool emailConfirmado;
+        public bool EmailConfirmado;
     }
     public class CiclistaInsertViewModel
     {
-        public string nome;
-        public string dataNascimento;
-        public string cpf;
+        public string? Nome { get; set; }
+        public string? DataNascimento { get; set; }
+        public string? CPF { get; set; }
 
-        public class Passaporte
-        {
-            public string numero;
-            public string validade;
-            public string pais;
-        }
+        public PassaporteViewModel? Passaporte { get; set; }
 
-        public string nacionalidade;
-        public string email;
-        public string urlFotoDocumento;
-        public string senha;
+        public string? Nacionalidade { get; set; }
+        public string? Email { get; set; }
+        public string? UrlFotoDocumento { get; set; }
+        public string? Senha { get; set; }
 
-        public class MeioDePagamento
-        {
-            public string nomeTitular;
-            public string numero;
-            public string validade;
-            public string cvv;
-        }
+        public  MeioDePagamentoViewModel? MeioDePagamento { get; set; }
     }
 }
