@@ -16,7 +16,7 @@ namespace Aluguel.API.ViewModels
 
         public  MeioDePagamentoViewModel? MeioDePagamento { get; set; }
 
-        public bool EmailConfirmado;
+        public bool EmailConfirmado { get; set; } = false;
     }
     public class CiclistaInsertViewModel
     {
