@@ -43,8 +43,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"Bernardo-A_pm-Aluguel" /o:"bernardo-a" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet build
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"Bernardo-A_pm-Aluguel" /o:"bernardo-a" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths=coverage.xml
+          dotnet build --no-incremental
           coverlet .\Aluguel.Tests\bin\Debug\net7.0\Aluguel.Tests.dll
           --target "dotnet" 
           --targetargs "test --no-build"
