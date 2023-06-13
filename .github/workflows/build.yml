@@ -44,5 +44,10 @@ jobs:
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"Bernardo-A_pm-Aluguel" /o:"bernardo-a" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet build
+          dotnet build --no-incremental
+          coverlet .\Aluguel.Tests\bin\Debug\net7.0\Aluguel.Tests.dll
+              --target "dotnet" 
+              --targetargs "test --no-build"
+              -f=opencover 
+              -o="coverage.xml"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
