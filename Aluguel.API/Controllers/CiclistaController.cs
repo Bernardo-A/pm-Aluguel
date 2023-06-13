@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Aluguel.API.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("ciclista")]
 public class CiclistaController : ControllerBase
 {
 
