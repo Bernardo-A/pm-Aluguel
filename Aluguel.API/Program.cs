@@ -2,7 +2,7 @@ using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
-ConfigureServices(builder.Services);
+//ConfigureServices(builder.Services);
 
 // Add services to the container.
 
@@ -30,7 +30,7 @@ app.MapControllers();
 
 app.Run();
 
-void ConfigureServices(IServiceCollection services)
-{
-    services.AddTransient<ICiclistaService, CiclistaService>();
-}
+//void ConfigureServices(IServiceCollection services)
+//{
+//    services.AddTransient<ICiclistaService, CiclistaService>();
+//}
