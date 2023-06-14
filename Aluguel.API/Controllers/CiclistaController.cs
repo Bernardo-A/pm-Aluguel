@@ -1,8 +1,7 @@
+using Aluguel.API.Services;
 using Aluguel.API.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-
 namespace Aluguel.API.Controllers;
 
 [ApiController]
@@ -40,4 +39,26 @@ public class CiclistaController : ControllerBase
         }
 
     }
+
+    [HttpPut]
+    [Route("{id}")]
+    public IActionResult Edit([FromBody] CiclistaEditViewModel ciclistaNovo, int id)
+    {
+        _logger.LogInformation("Alterando ciclista...");
+
+        try
+        {
+            var ciclistaAntigo = CiclistaService.GetCiclista();
+            var result = _mapper.Map<CiclistaEditViewModel, CiclistaViewModel>(ciclistaNovo, ciclistaAntigo);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("EditCiclista", "Erro ao alterar ciclista!");
+            _logger.LogError(ex, "Erro ao alterar ciclista!");
+            return BadRequest(ModelState);
+        }
+    }
+
+
 }
