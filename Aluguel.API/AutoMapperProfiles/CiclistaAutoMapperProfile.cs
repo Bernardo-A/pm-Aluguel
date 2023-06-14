@@ -3,10 +3,11 @@ using AutoMapper;
 
 namespace Aluguel.API.AutoMapperProfiles
 {
-    public class CiclitaAutoMapperProfile : Profile
+    public class CiclistaAutoMapperProfile : Profile
     {
-        public CiclitaAutoMapperProfile() {
+        public CiclistaAutoMapperProfile() {
             CreateMap<CiclistaInsertViewModel, CiclistaViewModel>();
+            CreateMap<CiclistaEditViewModel, CiclistaViewModel>();
         }
     }
 }

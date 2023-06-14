@@ -33,4 +33,18 @@ namespace Aluguel.API.ViewModels
 
         public  MeioDePagamentoViewModel? MeioDePagamento { get; set; }
     }
+
+    public class CiclistaEditViewModel
+    {
+        public string? Nome { get; set; }
+        public string? DataNascimento { get; set; }
+        public string? CPF { get; set; }
+
+        public PassaporteViewModel? Passaporte { get; set; }
+
+        public string? Nacionalidade { get; set; }
+        public string? Email { get; set; }
+        public string? UrlFotoDocumento { get; set; }
+
+    }
 }
