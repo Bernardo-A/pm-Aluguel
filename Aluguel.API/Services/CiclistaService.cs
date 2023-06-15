@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Aluguel.API.Services
 {
-    public class CiclistaService
+    public static class CiclistaService
     {
         public static CiclistaViewModel GetCiclista()
         {
