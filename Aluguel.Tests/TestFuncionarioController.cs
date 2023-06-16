@@ -10,17 +10,17 @@ using Xunit;
 
 namespace Aluguel.Tests;
 
-public class TestCiclistaController
+public class TestFuncionarioController
 {
     [Fact]
     public void CreateOnSuccessReturnStatusCode200()
     {
         var mockMapper = new Mock<IMapper>();
-        var mockLogger = new Mock<ILogger<CiclistaController>>();
+        var mockLogger = new Mock<ILogger<FuncionarioController>>();
 
-        var sut = new CiclistaController(mockLogger.Object, mockMapper.Object);
+        var sut = new FuncionarioController(mockLogger.Object, mockMapper.Object);
 
-        var result = (OkObjectResult)sut.Create(CiclistaMockData.GetCiclistaMockData());
+        var result = (OkObjectResult)sut.Create(FuncionarioMockData.GetFuncionarioMockData());
 
         result.StatusCode.Should().Be(200);
     }

@@ -24,20 +24,9 @@ public class CiclistaController : ControllerBase
     [Route("")]
     public IActionResult Create([FromBody] CiclistaInsertViewModel ciclista)
     {
-        _logger.LogInformation("Criando ciclista...");
-
-        try
-        {
-            var result = _mapper.Map<CiclistaViewModel>(ciclista);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            ModelState.AddModelError("CreateCiclista", "Erro ao criar ciclista!");
-            _logger.LogError(ex, "Erro ao criar ciclista!");
-            return BadRequest(ModelState);
-        }
-
+        _logger.LogInformation("Criando ciclista...");       
+        var result = _mapper.Map<CiclistaViewModel>(ciclista);
+        return Ok(result);    
     }
 
     [HttpPut]
@@ -45,19 +34,9 @@ public class CiclistaController : ControllerBase
     public IActionResult Edit([FromBody] CiclistaEditViewModel ciclistaNovo, int id)
     {
         _logger.LogInformation("Alterando ciclista...");
-
-        try
-        {
-            var ciclistaAntigo = CiclistaService.GetCiclista();
-            var result = _mapper.Map<CiclistaEditViewModel, CiclistaViewModel>(ciclistaNovo, ciclistaAntigo);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            ModelState.AddModelError("EditCiclista", "Erro ao alterar ciclista!");
-            _logger.LogError(ex, "Erro ao alterar ciclista!");
-            return BadRequest(ModelState);
-        }
+        var ciclistaAntigo = CiclistaService.GetCiclista();
+        var result = _mapper.Map<CiclistaEditViewModel, CiclistaViewModel>(ciclistaNovo, ciclistaAntigo);
+        return Ok(result);
     }
 
 
