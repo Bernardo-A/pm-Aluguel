@@ -26,38 +26,19 @@ public class FuncionarioController : ControllerBase
     {
         _logger.LogInformation("Criando funcionário...");
 
-        try
-        {
-            var result = _mapper.Map<FuncionarioViewModel>(funcionario);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            ModelState.AddModelError("CreateFuncionario", "Erro ao criar funcionário!");
-            _logger.LogError(ex, "Erro ao criar funcionário!");
-            return BadRequest(ModelState);
-        }
-
+        var result = _mapper.Map<FuncionarioViewModel>(funcionario);
+        return Ok(result);
     }
 
     [HttpPut]
     [Route("{id}")]
     public IActionResult Edit([FromBody] FuncionarioEditViewModel funcionarioNovo, int id)
     {
-        _logger.LogInformation("Alterando funcionário...");
 
-        try
-        {
-            var funcionarioAntigo = FuncionarioService.GetFuncionario();
-            var result = _mapper.Map<FuncionarioEditViewModel, FuncionarioViewModel>(funcionarioNovo, funcionarioAntigo);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            ModelState.AddModelError("EditFuncionario", "Erro ao alterar funcionário!");
-            _logger.LogError(ex, "Erro ao alterar funcionário!");
-            return BadRequest(ModelState);
-        }
+        _logger.LogInformation("Alterando funcionário...");
+        var funcionarioAntigo = FuncionarioService.GetFuncionario();
+        var result = _mapper.Map<FuncionarioEditViewModel, FuncionarioViewModel>(funcionarioNovo, funcionarioAntigo);
+        return Ok(result);
     }
 
     [HttpDelete]
@@ -66,17 +47,8 @@ public class FuncionarioController : ControllerBase
     {
         _logger.LogInformation("Deletando funcionário...");
 
-        try
-        {
-            var funcionario = FuncionarioService.GetFuncionario();
-            funcionario.Habilitado = false;
-            return Ok();
-        }
-        catch(Exception ex)
-        {
-            ModelState.AddModelError("DeleteFuncionario", "Erro ao deletar funcionário!");
-            _logger.LogError(ex, "Erro ao deletar funcionário!");
-            return BadRequest(ModelState);
-        }
+        var funcionario = FuncionarioService.GetFuncionario();
+        funcionario.Habilitado = false;
+        return Ok();
     }
 }
