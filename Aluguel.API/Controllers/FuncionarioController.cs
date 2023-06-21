@@ -13,10 +13,13 @@ public class FuncionarioController : ControllerBase
 
     private readonly IMapper _mapper;
 
-    public FuncionarioController(ILogger<FuncionarioController> logger, IMapper mapper)
+    private readonly IFuncionarioService _funcionarioService;
+
+    public FuncionarioController(ILogger<FuncionarioController> logger, IMapper mapper, IFuncionarioService funcionarioService)
     {
         _logger = logger;
         _mapper = mapper;
+        _funcionarioService = funcionarioService;
     }
 
 
@@ -36,8 +39,9 @@ public class FuncionarioController : ControllerBase
     {
 
         _logger.LogInformation("Alterando funcionário...");
-        var funcionarioAntigo = FuncionarioService.GetFuncionario();
+        var funcionarioAntigo = _funcionarioService.GetFuncionario();
         var result = _mapper.Map<FuncionarioEditViewModel, FuncionarioViewModel>(funcionarioNovo, funcionarioAntigo);
+        result.Id = id;
         return Ok(result);
     }
 
@@ -47,8 +51,9 @@ public class FuncionarioController : ControllerBase
     {
         _logger.LogInformation("Deletando funcionário...");
 
-        var funcionario = FuncionarioService.GetFuncionario();
+        var funcionario = _funcionarioService.GetFuncionario();
         funcionario.Habilitado = false;
-        return Ok();
+        funcionario.Id = id;
+        return Ok(funcionario);
     }
 }
