@@ -7,9 +7,13 @@ using System.Threading.Tasks;
 
 namespace Aluguel.API.Services
 {
-    public static class FuncionarioService
+    public interface IFuncionarioService
     {
-        public static FuncionarioViewModel GetFuncionario()
+        public FuncionarioViewModel GetFuncionario();
+    }
+    public class FuncionarioService : IFuncionarioService
+    {
+        public FuncionarioViewModel GetFuncionario()
         {
             return new FuncionarioViewModel
             {
