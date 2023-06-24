@@ -11,57 +11,121 @@ public class CiclistaController : ControllerBase
 
     private readonly ILogger<CiclistaController> _logger;
 
-    private readonly IMapper _mapper;
+    private readonly ICiclistaService _CiclistaService;
 
-    private readonly ICiclistaService _ciclistaService;
 
-    public CiclistaController(ILogger<CiclistaController> logger, IMapper mapper, ICiclistaService ciclistaService)
+    public CiclistaController(ILogger<CiclistaController> logger, ICiclistaService CiclistaService)
     {
         _logger = logger;
-        _mapper = mapper;
-        _ciclistaService = ciclistaService;
+        _CiclistaService = CiclistaService;
     }
 
 
     [HttpPost]
     [Route("")]
-    public IActionResult Create([FromBody] CiclistaInsertViewModel ciclista)
+    public IActionResult Create([FromBody] CiclistaInsertViewModel Ciclista)
     {
         _logger.LogInformation("Criando ciclista...");
-        var result = _mapper.Map<CiclistaViewModel>(ciclista);
+
+        var result = _CiclistaService.CreateCiclista(Ciclista);
         return Ok(result);
     }
 
-    [HttpPut]
+    [HttpGet]
     [Route("{id}")]
-    public IActionResult Edit([FromBody] CiclistaEditViewModel ciclistaNovo, int id)
+    public IActionResult Get(int id)
     {
-        _logger.LogInformation("Alterando ciclista...");
-        var ciclistaAntigo = _ciclistaService.GetCiclista();
-        var result = _mapper.Map(ciclistaNovo, ciclistaAntigo); 
-        result.Id = id;
-        return Ok(result);
+        if (_CiclistaService.Contains(id))
+        {
+            return Ok(_CiclistaService.GetCiclista(id));
+        }
+        return NotFound();
     }
 
     [HttpPost]
     [Route("{id}/ativar")]
-    public IActionResult EnableCiclista([FromBody] string requisicaoId, int id)
+    public IActionResult Active (int id)
     {
-        _logger.LogInformation("Atualizando status...");
-        var ciclista = _ciclistaService.GetCiclista();
-        ciclista.Id = id;
-        ciclista.EmailConfirmado = true;
-        return Ok(ciclista);
+        if (_CiclistaService.Contains(id))
+        {
+            _logger.LogInformation("Ativando ciclista...");
+            var result = _CiclistaService.Activate(id);
+            return Ok(result);
+        }
+        return NotFound();
+    }
+
+    [HttpGet]
+    [Route("{id}/permiteAluguel")]
+    public IActionResult CheckAluguel (int id)
+    {
+        return Ok(id);
+    }
+
+    [HttpGet]
+    [Route("{id}/bicicletaAlugada")]
+    public IActionResult GetBicicleta (int id)
+    {
+        return Ok(id);
+    }
+
+    [HttpGet]
+    [Route("existeEmail/{email}")]
+    public bool CheckEmail(string email)
+    {
+        return _CiclistaService.IsEmailRegistered(email);
     }
 
     [HttpPut]
-    [Route("{id}/cartao")]
-    public IActionResult EditCartao([FromBody] MeioDePagamentoViewModel meio, int id)
+    [Route("{id}")]
+    public IActionResult Edit([FromBody] CiclistaEditViewModel CiclistaNovo, int id)
     {
-        _logger.LogInformation("Atualizando cartao...");
-        var ciclista = _ciclistaService.GetCiclista();
-        ciclista.Id = id;
-        ciclista.MeioDePagamento = meio;
-        return Ok(ciclista);
+        _logger.LogInformation("Alterando ciclista...");
+        if (_CiclistaService.Contains(id))
+        {
+            var result = _CiclistaService.UpdateCiclista(CiclistaNovo, id);
+            return Ok(result);
+        }
+        return NotFound();
     }
+
+    [HttpGet]
+    [Route("cartaoDeCredito/{id}")]
+    public IActionResult GetCard(int id)
+    {
+        if (_CiclistaService.Contains(id))
+        {
+            var ciclista = _CiclistaService.GetCiclista(id);
+            var result = ciclista.MeioDePagamento;
+            return Ok(result);
+        }
+        return NotFound();
+    }
+
+    [HttpPut]
+    [Route("cartaoDeCredito/{id}")]
+    public IActionResult Edit([FromBody] MeioDePagamentoViewModel cartaoNovo, int id)
+    {
+        _logger.LogInformation("Alterando cartão do ciclista...");
+        if (_CiclistaService.Contains(id))
+        {
+            var result = _CiclistaService.UpdateCartao(cartaoNovo, id);
+            return Ok(result);
+        }
+        return NotFound();
+    }
+    
+
+    //[HttpDelete]
+    //[Route("{id}")]
+    //public IActionResult Delete(int id)
+    //{
+    //    _logger.LogInformation("Deletando funcionário...");
+    //    if (_CiclistaService.GetCiclista(id) == null)
+    //    {
+    //        return NotFound();
+    //    }
+    //    var Ciclista = _CiclistaService.DeleteCiclista(id);
+    //    return Ok(Ciclista);
+    //}
 }

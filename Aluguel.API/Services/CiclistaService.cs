@@ -1,46 +1,110 @@
+using AutoMapper;
 using Aluguel.API.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Aluguel.API.Services
 {
     public interface ICiclistaService
     {
-        public CiclistaViewModel GetCiclista();
+        public CiclistaViewModel CreateCiclista(CiclistaInsertViewModel Ciclista);
+        public CiclistaViewModel GetCiclista(int id);
+        public CiclistaViewModel UpdateCiclista(CiclistaEditViewModel Ciclista, int id);
+        public bool Contains(int id);
+        public List<CiclistaViewModel> GetAll();
+        public CiclistaViewModel Activate(int id);
+        public bool IsEmailRegistered(string email);
+        public CiclistaViewModel UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id);
+        //public CiclistaViewModel DeleteCiclista(int id);
     }
 
     public class CiclistaService : ICiclistaService
     {
-        public CiclistaViewModel GetCiclista()
+        private static readonly Dictionary<int, CiclistaViewModel> dict = new();
+
+        private readonly IMapper _mapper;
+
+        public CiclistaService(IMapper mapper)
         {
-            return new CiclistaViewModel
+            _mapper = mapper;
+        }
+
+        public CiclistaViewModel CreateCiclista(CiclistaInsertViewModel Ciclista)
+        {
+            var result = _mapper.Map<CiclistaInsertViewModel, CiclistaViewModel>(Ciclista);
+            result.Id = dict.Count;
+            dict.Add(dict.Count, result);
+            return (result);
+        }
+
+        public CiclistaViewModel GetCiclista(int id)
+        {
+            return dict.ElementAt(id).Value;
+        }
+
+
+        public CiclistaViewModel UpdateCiclista(CiclistaEditViewModel CiclistaNovo, int id)
+        {
+            var CiclistaAntigo = dict.ElementAt(id).Value;
+            var result = _mapper.Map(CiclistaNovo, CiclistaAntigo);
+            dict[id] = result;
+            return (result);
+        }
+
+        public CiclistaViewModel UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id)
+        {
+            var ciclista = dict.ElementAt(id).Value;
+            ciclista.MeioDePagamento = cartaoNovo;
+            dict[id] = ciclista;
+            return (ciclista);
+        }
+
+        public CiclistaViewModel Activate (int id)
+        {
+            dict[id].EmailConfirmado = true;
+            return dict.ElementAt(id).Value;
+        }
+
+        public bool Contains (int id)
+        {
+            if (dict.ContainsKey(id))
             {
-                Id = 0,
-                Nome = "Joao Silva",
-                DataNascimento = "01/01/2001",
-                CPF = "201.902.910-36",
-                Passaporte = new PassaporteViewModel
+                return true;
+            }
+            return false;
+        }
+
+        //public CiclistaViewModel DeleteCiclista(int id)
+        //{
+        //    dict[id].Status = "Excluida";
+        //    return dict.ElementAt(id).Value;
+        //}
+
+        public List<CiclistaViewModel> GetAll()
+        {
+            List<CiclistaViewModel> result = new();
+            Dictionary<int, CiclistaViewModel>.ValueCollection objects = dict.Values;
+            foreach (var value in objects)
+            {
+                result.Add(value);
+            }
+            return result;
+        }
+
+        public bool IsEmailRegistered (string email)
+        {
+            var lista = GetAll();
+            foreach (var item in lista)
+            {
+                if (item.Email == email)
                 {
-                    Numero = "11111111",
-                    Pais = "Pais",
-                    Validade = "01/01/2001"
-                },
-                Nacionalidade = "Brasileiro",
-                Email = "joaosilva@email.com",
-                UrlFotoDocumento = "imagem.com",
-                Senha = "123456",
-                MeioDePagamento = new MeioDePagamentoViewModel
-                {
-                    NomeTitular = "Joao Silva",
-                    Numero = "4111111111111111",
-                    Validade = "01/01/2001",
-                    CVV = "999"
-                },
-                EmailConfirmado = false
-            };
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public int ReturnSize()
+        {
+            return dict.Count;
         }
 
     }

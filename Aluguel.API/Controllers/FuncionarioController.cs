@@ -11,14 +11,12 @@ public class FuncionarioController : ControllerBase
 
     private readonly ILogger<FuncionarioController> _logger;
 
-    private readonly IMapper _mapper;
-
     private readonly IFuncionarioService _funcionarioService;
 
-    public FuncionarioController(ILogger<FuncionarioController> logger, IMapper mapper, IFuncionarioService funcionarioService)
+
+    public FuncionarioController(ILogger<FuncionarioController> logger, IFuncionarioService funcionarioService)
     {
         _logger = logger;
-        _mapper = mapper;
         _funcionarioService = funcionarioService;
     }
 
@@ -29,20 +27,32 @@ public class FuncionarioController : ControllerBase
     {
         _logger.LogInformation("Criando funcionário...");
 
-        var result = _mapper.Map<FuncionarioViewModel>(funcionario);
+        var result = _funcionarioService.CreateFuncionario(funcionario);
         return Ok(result);
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public IActionResult Get(int id)
+    {
+        if (_funcionarioService.Contains(id))
+        {
+            return Ok(_funcionarioService.GetFuncionario(id));
+        }
+        return NotFound();
     }
 
     [HttpPut]
     [Route("{id}")]
     public IActionResult Edit([FromBody] FuncionarioEditViewModel funcionarioNovo, int id)
     {
-
         _logger.LogInformation("Alterando funcionário...");
-        var funcionarioAntigo = _funcionarioService.GetFuncionario();
-        var result = _mapper.Map<FuncionarioEditViewModel, FuncionarioViewModel>(funcionarioNovo, funcionarioAntigo);
-        result.Id = id;
-        return Ok(result);
+        if (_funcionarioService.Contains(id))
+        {
+            var result = _funcionarioService.UpdateFuncionario(funcionarioNovo, id);
+            return Ok(result);
+        }
+        return NotFound();
     }
 
     [HttpDelete]
@@ -50,10 +60,23 @@ public class FuncionarioController : ControllerBase
     public IActionResult Delete(int id)
     {
         _logger.LogInformation("Deletando funcionário...");
-
-        var funcionario = _funcionarioService.GetFuncionario();
-        funcionario.Habilitado = false;
-        funcionario.Id = id;
-        return Ok(funcionario);
+        if (_funcionarioService.Contains(id))
+        {
+            var funcionario = _funcionarioService.DeleteFuncionario(id);
+            return Ok(funcionario);
+        }
+        return NotFound();
     }
+
+    [HttpGet]
+    [Route("")]
+    public IActionResult GetAll()
+    {
+        if (_funcionarioService.IsEmpty())
+        {
+            return NotFound();
+        }
+        return Ok(_funcionarioService.GetAll());
+    }
+
 }
