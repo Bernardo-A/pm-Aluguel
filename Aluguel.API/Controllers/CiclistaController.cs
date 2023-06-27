@@ -63,8 +63,8 @@ public class CiclistaController : ControllerBase
     {
         if (_CiclistaService.Contains(id))
         {
-            var result = _AluguelService.HasAluguelAtivo(id);
-            if (result)
+            var result = _AluguelService.GetAluguelAtivo(id);
+            if (result != null)
             {
                 return Ok(false);
             }
@@ -82,7 +82,6 @@ public class CiclistaController : ControllerBase
             var ativo = _AluguelService.GetAluguelAtivo(id);
             if (ativo != null)
             {
-                //TODO chamar API equipamento para pegar os dados da bicicleta
                 return Ok(ativo.BicicletaId);
             }
         }
@@ -124,7 +123,7 @@ public class CiclistaController : ControllerBase
 
     [HttpPut]
     [Route("cartaoDeCredito/{id}")]
-    public IActionResult Edit([FromBody] MeioDePagamentoViewModel cartaoNovo, int id)
+    public IActionResult EditCard([FromBody] MeioDePagamentoViewModel cartaoNovo, int id)
     {
         _logger.LogInformation("Alterando cartão do ciclista...");
         if (_CiclistaService.Contains(id))
@@ -134,18 +133,5 @@ public class CiclistaController : ControllerBase
         }
         return NotFound();
     }
-    
 
-    //[HttpDelete]
-    //[Route("{id}")]
-    //public IActionResult Delete(int id)
-    //{
-    //    _logger.LogInformation("Deletando funcionário...");
-    //    if (_CiclistaService.GetCiclista(id) == null)
-    //    {
-    //        return NotFound();
-    //    }
-    //    var Ciclista = _CiclistaService.DeleteCiclista(id);
-    //    return Ok(Ciclista);
-    //}
 }

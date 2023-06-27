@@ -7,16 +7,12 @@ namespace Aluguel.API.Controllers;
 [Route("aluguel")]
 public class AluguelController : ControllerBase
 {
-
-    private readonly ILogger<AluguelController> _logger;
-
     private readonly IAluguelService _AluguelService;
     private readonly ICiclistaService _CiclistaService;
     private readonly IEquipamentoService _EquipamentoService;
 
-    public AluguelController(ILogger<AluguelController> logger, IAluguelService AluguelService, ICiclistaService ciclistaService, IEquipamentoService equipamentoService)
+    public AluguelController(IAluguelService AluguelService, ICiclistaService ciclistaService, IEquipamentoService equipamentoService)
     {
-        _logger = logger;
         _AluguelService = AluguelService;
         _CiclistaService = ciclistaService;
         _EquipamentoService = equipamentoService;
@@ -29,9 +25,8 @@ public class AluguelController : ControllerBase
         if (_CiclistaService.Contains(aluguel.CiclistaId))
         {   
             var ciclista = _CiclistaService.GetCiclista(aluguel.CiclistaId);
-            if (_AluguelService.HasAluguelAtivo(ciclista.Id))
+            if (_AluguelService.GetAluguel(ciclista.Id) != null)
             {
-                //TODO caso de uso enviar email com os dados do aluguel
                 return BadRequest();
             }
             var tranca = _EquipamentoService.GetTranca(aluguel.TrancaId);
@@ -39,10 +34,6 @@ public class AluguelController : ControllerBase
             {
                 return BadRequest();
             }
-            //TODO Chamar serviço para validar cartão
-            //TODO gerar cobrança
-            //TODO conferir pagamento
-            //TODO alterar status tranca e bicicleta
             var result = _AluguelService.CreateAluguel(ciclista, tranca);
             return Ok(result);
         }

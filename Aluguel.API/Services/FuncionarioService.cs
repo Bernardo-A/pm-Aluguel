@@ -7,7 +7,7 @@ namespace Aluguel.API.Services
     {
         public FuncionarioViewModel CreateFuncionario(FuncionarioInsertViewModel Funcionario);
         public FuncionarioViewModel GetFuncionario(int id);
-        public FuncionarioViewModel UpdateFuncionario(FuncionarioEditViewModel Funcionario, int id);
+        public FuncionarioViewModel UpdateFuncionario(FuncionarioEditViewModel funcionarioNovo, int id);
         public FuncionarioViewModel DeleteFuncionario(int id);
         public bool Contains(int id);
         public List<FuncionarioViewModel> GetAll();
@@ -38,10 +38,10 @@ namespace Aluguel.API.Services
             return dict.ElementAt(id).Value;
         }
 
-        public FuncionarioViewModel UpdateFuncionario(FuncionarioEditViewModel FuncionarioNovo, int id)
+        public FuncionarioViewModel UpdateFuncionario(FuncionarioEditViewModel funcionarioNovo, int id)
         {
-            var FuncionarioAntigo = dict.ElementAt(id).Value;
-            var result = _mapper.Map(FuncionarioNovo, FuncionarioAntigo);
+            var funcionarioAntigo = dict.ElementAt(id).Value;
+            var result = _mapper.Map(funcionarioNovo, funcionarioAntigo);
             dict[id] = result;
             return (result);
         }

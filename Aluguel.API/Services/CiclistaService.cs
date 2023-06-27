@@ -7,13 +7,12 @@ namespace Aluguel.API.Services
     {
         public CiclistaViewModel CreateCiclista(CiclistaInsertViewModel Ciclista);
         public CiclistaViewModel GetCiclista(int id);
-        public CiclistaViewModel UpdateCiclista(CiclistaEditViewModel Ciclista, int id);
+        public CiclistaViewModel UpdateCiclista(CiclistaEditViewModel ciclistaNovo, int id);
         public bool Contains(int id);
         public List<CiclistaViewModel> GetAll();
         public CiclistaViewModel Activate(int id);
         public bool IsEmailRegistered(string email);
         public CiclistaViewModel UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id);
-        //public CiclistaViewModel DeleteCiclista(int id);
     }
 
     public class CiclistaService : ICiclistaService
@@ -40,11 +39,10 @@ namespace Aluguel.API.Services
             return dict.ElementAt(id).Value;
         }
 
-
-        public CiclistaViewModel UpdateCiclista(CiclistaEditViewModel CiclistaNovo, int id)
+        public CiclistaViewModel UpdateCiclista(CiclistaEditViewModel ciclistaNovo, int id)
         {
-            var CiclistaAntigo = dict.ElementAt(id).Value;
-            var result = _mapper.Map(CiclistaNovo, CiclistaAntigo);
+            var ciclistaAntigo = dict.ElementAt(id).Value;
+            var result = _mapper.Map(ciclistaNovo, ciclistaAntigo);
             dict[id] = result;
             return (result);
         }
@@ -71,12 +69,6 @@ namespace Aluguel.API.Services
             }
             return false;
         }
-
-        //public CiclistaViewModel DeleteCiclista(int id)
-        //{
-        //    dict[id].Status = "Excluida";
-        //    return dict.ElementAt(id).Value;
-        //}
 
         public List<CiclistaViewModel> GetAll()
         {
