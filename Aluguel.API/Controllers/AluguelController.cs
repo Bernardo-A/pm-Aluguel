@@ -8,33 +8,19 @@ namespace Aluguel.API.Controllers;
 public class AluguelController : ControllerBase
 {
     private readonly IAluguelService _AluguelService;
-    private readonly ICiclistaService _CiclistaService;
-    private readonly IEquipamentoService _EquipamentoService;
 
-    public AluguelController(IAluguelService AluguelService, ICiclistaService ciclistaService, IEquipamentoService equipamentoService)
+    public AluguelController(IAluguelService AluguelService)
     {
         _AluguelService = AluguelService;
-        _CiclistaService = ciclistaService;
-        _EquipamentoService = equipamentoService;
     }
 
     [HttpPost]
     [Route("")]
     public IActionResult Create([FromBody] AluguelInsertViewModel aluguel)
     {
-        if (_CiclistaService.Contains(aluguel.CiclistaId))
-        {   
-            var ciclista = _CiclistaService.GetCiclista(aluguel.CiclistaId);
-            if (_AluguelService.GetAluguel(ciclista.Id) != null)
-            {
-                return BadRequest();
-            }
-            var tranca = _EquipamentoService.GetTranca(aluguel.TrancaId);
-            if (tranca.BicicletaId == null)
-            {
-                return BadRequest();
-            }
-            var result = _AluguelService.CreateAluguel(ciclista, tranca);
+        var result = _AluguelService.CreateAluguel(aluguel);
+        if (result != null)
+        {
             return Ok(result);
         }
         return BadRequest();
@@ -42,9 +28,14 @@ public class AluguelController : ControllerBase
 
     [HttpPost]
     [Route("/devolucao")]
-    public IActionResult Retrieve([FromBody] AluguelInsertViewModel aluguel)
+    public IActionResult Retrieve([FromBody] AluguelRetrieveViewModel aluguel)
     {
-        return Ok();
+        var result = _AluguelService.Devolver(aluguel);
+        if (result != null)
+        {
+            return Ok(result);
+        }
+        return NotFound();
     }
 
 

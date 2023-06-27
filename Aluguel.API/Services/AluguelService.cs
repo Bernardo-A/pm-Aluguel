@@ -7,33 +7,51 @@ namespace Aluguel.API.Services
 {
     public interface IAluguelService
     {
-        public AluguelViewModel CreateAluguel(CiclistaViewModel ciclista, TrancaViewModel tranca);
+        public AluguelViewModel? CreateAluguel(AluguelInsertViewModel aluguel);
         public AluguelViewModel GetAluguel(int id);
         public bool Contains(int id);
         public List<AluguelViewModel> GetAll();
         public AluguelViewModel? GetAluguelAtivo(int ciclistaId);
+        public AluguelViewModel? Devolver(AluguelRetrieveViewModel aluguel);
     }
 
     public class AluguelService : IAluguelService
     {
         private static readonly Dictionary<int, AluguelViewModel> dict = new();
+        private readonly ICiclistaService _CiclistaService;
+        private readonly IEquipamentoService _EquipamentoService;
 
-        public AluguelService()
+        public AluguelService(ICiclistaService ciclistaService, IEquipamentoService equipamentoService)
         {
-            
+            _CiclistaService = ciclistaService;
+            _EquipamentoService = equipamentoService;
         }
 
-        public AluguelViewModel CreateAluguel(CiclistaViewModel ciclista, TrancaViewModel tranca)
+        public AluguelViewModel? CreateAluguel(AluguelInsertViewModel aluguel)
         {
-            var aluguel = new AluguelViewModel
+            if (_CiclistaService.Contains(aluguel.CiclistaId))
             {
-                CiclistaId = ciclista.Id,
-                Id = dict.Count,
-                TrancaInicio = tranca.Id,
-                BicicletaId = tranca.BicicletaId
-            };
-            dict.Add(dict.Count, aluguel);
-            return aluguel;
+                var ciclista = _CiclistaService.GetCiclista(aluguel.CiclistaId);
+                if (GetAluguelAtivo(ciclista.Id) != null)
+                {
+                    return null;
+                }
+                var tranca = _EquipamentoService.GetTranca(aluguel.TrancaId);
+                if (tranca.BicicletaId == null)
+                {
+                    return null;
+                }
+                var result = new AluguelViewModel()
+                {
+                    CiclistaId = ciclista.Id,
+                    Id = dict.Count,
+                    TrancaInicio = tranca.Id,
+                    BicicletaId = tranca.BicicletaId
+                };
+                dict.Add(dict.Count, result);
+                return result;
+            }
+            return null;
         }
 
         public AluguelViewModel? GetAluguelAtivo(int ciclistaId)
@@ -72,6 +90,21 @@ namespace Aluguel.API.Services
                 result.Add(value);
             }
             return result;
+        }
+
+        public AluguelViewModel? Devolver(AluguelRetrieveViewModel aluguel)
+        {
+            Dictionary<int, AluguelViewModel>.ValueCollection objects = dict.Values;
+            foreach (var value in objects)
+            {
+                if (value.BicicletaId == aluguel.BicicletaId && (value.TrancaFim == null && value.DataDevolucao == null))
+                {
+                    value.DataDevolucao = DateTime.UtcNow;
+                    value.TrancaFim = aluguel.TrancaId;
+                    return value;
+                }
+            }
+            return null;
         }
 
     }

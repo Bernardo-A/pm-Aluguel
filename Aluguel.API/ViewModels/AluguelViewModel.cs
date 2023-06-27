@@ -30,4 +30,11 @@ namespace Aluguel.API.ViewModels
 
     }
 
+    public class AluguelRetrieveViewModel
+    {
+        public int TrancaId { get; set; }
+        public int BicicletaId { get; set; }
+
+    }
+
 }
