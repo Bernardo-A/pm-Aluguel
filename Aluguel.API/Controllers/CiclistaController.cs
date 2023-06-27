@@ -12,12 +12,14 @@ public class CiclistaController : ControllerBase
     private readonly ILogger<CiclistaController> _logger;
 
     private readonly ICiclistaService _CiclistaService;
+    private readonly IAluguelService _AluguelService;
 
 
-    public CiclistaController(ILogger<CiclistaController> logger, ICiclistaService CiclistaService)
+    public CiclistaController(ILogger<CiclistaController> logger, ICiclistaService CiclistaService, IAluguelService AluguelService)
     {
         _logger = logger;
         _CiclistaService = CiclistaService;
+        _AluguelService = AluguelService;
     }
 
 
@@ -44,7 +46,7 @@ public class CiclistaController : ControllerBase
 
     [HttpPost]
     [Route("{id}/ativar")]
-    public IActionResult Active (int id)
+    public IActionResult Activate (int id)
     {
         if (_CiclistaService.Contains(id))
         {
@@ -59,13 +61,31 @@ public class CiclistaController : ControllerBase
     [Route("{id}/permiteAluguel")]
     public IActionResult CheckAluguel (int id)
     {
-        return Ok(id);
+        if (_CiclistaService.Contains(id))
+        {
+            var result = _AluguelService.HasAluguelAtivo(id);
+            if (result)
+            {
+                return Ok(false);
+            }
+            return Ok(true);
+        }
+        return NotFound();
     }
 
     [HttpGet]
     [Route("{id}/bicicletaAlugada")]
     public IActionResult GetBicicleta (int id)
     {
+        if (_CiclistaService.Contains(id))
+        {
+            var ativo = _AluguelService.GetAluguelAtivo(id);
+            if (ativo != null)
+            {
+                //TODO chamar API equipamento para pegar os dados da bicicleta
+                return Ok(ativo.BicicletaId);
+            }
+        }
         return Ok(id);
     }
 
