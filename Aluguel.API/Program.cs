@@ -34,4 +34,6 @@ void ConfigureServices(IServiceCollection services)
 {
     services.AddTransient<ICiclistaService, CiclistaService>();
     services.AddTransient<IFuncionarioService, FuncionarioService>();
+    services.AddTransient<IAluguelService, AluguelService>();
+    services.AddTransient<IEquipamentoService, EquipamentoService>();
 }
