@@ -102,7 +102,11 @@ namespace Aluguel.API.Services
                     value.DataDevolucao = DateTime.Now;
                     value.TrancaFim = aluguel.TrancaId;
                     if (value.DataAluguel.AddMinutes(120) > value.DataDevolucao) {
-                        var cobranca = new { valor = 0, ciclista = value.CiclistaId }; 
+                        var cobranca = new { valor = 0, ciclista = value.CiclistaId };
+                        if (cobranca == null)
+                        {
+                            return value;
+                        }
                     }
                     return value;
                 }
