@@ -99,8 +99,11 @@ namespace Aluguel.API.Services
             {
                 if (value.BicicletaId == aluguel.BicicletaId && (value.TrancaFim == null && value.DataDevolucao == null))
                 {
-                    value.DataDevolucao = DateTime.UtcNow;
+                    value.DataDevolucao = DateTime.Now;
                     value.TrancaFim = aluguel.TrancaId;
+                    if (value.DataAluguel.AddMinutes(120) > value.DataDevolucao) {
+                        var cobranca = new { valor = 0, ciclista = value.CiclistaId }; 
+                    }
                     return value;
                 }
             }
