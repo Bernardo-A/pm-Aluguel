@@ -29,7 +29,11 @@ public class CiclistaController : ControllerBase
     {
         _logger.LogInformation("Criando ciclista...");
         var result = _CiclistaService.CreateCiclista(Ciclista);
-        return Ok(result);
+        if (result != null)
+        {
+            return Ok(result);
+        }
+        return BadRequest();
     }
 
     [HttpGet]
@@ -84,7 +88,7 @@ public class CiclistaController : ControllerBase
                 return Ok(ativo.BicicletaId);
             }
         }
-        return Ok(id);
+        return NotFound();
     }
 
     [HttpGet]
