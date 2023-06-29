@@ -28,7 +28,11 @@ public class FuncionarioController : ControllerBase
         _logger.LogInformation("Criando funcionário...");
 
         var result = _funcionarioService.CreateFuncionario(funcionario);
-        return Ok(result);
+        if (result != null)
+        {
+            return Ok(result);
+        }
+        return BadRequest();
     }
 
     [HttpGet]

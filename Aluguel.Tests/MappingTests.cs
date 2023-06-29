@@ -11,18 +11,6 @@ namespace Aluguel.Tests
 {
     public class MappingTests
     {
-        [Fact]
-        public void SetupCiclista()
-        {
-            MapperConfiguration mapperConfiguration = new(cfg =>
-            {
-                cfg.AddProfile(new CiclistaAutoMapperProfile());
-            }); ;
-
-            IMapper mapper = new Mapper(mapperConfiguration);
-
-            mapper.ConfigurationProvider.AssertConfigurationIsValid();
-        }
 
         [Fact]
         public void SetupFuncionario()

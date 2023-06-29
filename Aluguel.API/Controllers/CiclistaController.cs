@@ -28,7 +28,6 @@ public class CiclistaController : ControllerBase
     public IActionResult Create([FromBody] CiclistaInsertViewModel Ciclista)
     {
         _logger.LogInformation("Criando ciclista...");
-
         var result = _CiclistaService.CreateCiclista(Ciclista);
         return Ok(result);
     }

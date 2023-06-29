@@ -32,27 +32,24 @@ namespace Aluguel.API.Services
             if (_CiclistaService.Contains(aluguel.CiclistaId))
             {
                 var ciclista = _CiclistaService.GetCiclista(aluguel.CiclistaId);
-                if (ciclista.EmailConfirmado)
+                if (GetAluguelAtivo(ciclista.Id) != null)
                 {
-                    if (GetAluguelAtivo(ciclista.Id) != null)
-                    {
-                        return null;
-                    }
-                    var tranca = _EquipamentoService.GetTranca(aluguel.TrancaId);
-                    if (tranca.BicicletaId == null)
-                    {
-                        return null;
-                    }
-                    var result = new AluguelViewModel()
-                    {
-                        CiclistaId = ciclista.Id,
-                        Id = dict.Count,
-                        TrancaInicio = tranca.Id,
-                        BicicletaId = tranca.BicicletaId
-                    };
-                    dict.Add(dict.Count, result);
-                    return result;
+                    return null;
                 }
+                var tranca = _EquipamentoService.GetTranca(aluguel.TrancaId);
+                if (tranca.BicicletaId == null)
+                {
+                    return null;
+                }
+                var result = new AluguelViewModel()
+                {
+                    CiclistaId = ciclista.Id,
+                    Id = dict.Count,
+                    TrancaInicio = tranca.Id,
+                    BicicletaId = tranca.BicicletaId
+                };
+                dict.Add(dict.Count, result);
+                return result;
             }
             return null;
         }
