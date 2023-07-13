@@ -108,7 +108,7 @@ public class CiclistaController : ControllerBase
     }
 
     [HttpGet]
-    [Route("cartaoDeCredito/{id}")]
+    [Route("/cartaoDeCredito/{id}")]
     public IActionResult GetCard(int id)
     {
         if (_CiclistaService.Contains(id))
@@ -121,7 +121,7 @@ public class CiclistaController : ControllerBase
     }
 
     [HttpPut]
-    [Route("cartaoDeCredito/{id}")]
+    [Route("/cartaoDeCredito/{id}")]
     public IActionResult EditCard([FromBody] MeioDePagamentoViewModel cartaoNovo, int id)
     {
         _logger.LogInformation("Alterando cartão do ciclista...");
