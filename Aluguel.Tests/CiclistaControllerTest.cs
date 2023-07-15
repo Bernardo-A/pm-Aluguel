@@ -1,100 +1,195 @@
-//using Aluguel.API.AutoMapperProfiles;
-//using Aluguel.API.Controllers;
-//using Aluguel.API.Services;
-//using Aluguel.API.ViewModels;
-//using Aluguel.Tests.MockData;
-//using AutoMapper;
-//using FluentAssertions;
-//using Microsoft.AspNetCore.Mvc;
-//using Microsoft.Extensions.Logging;
-//using Moq;
-//using Xunit;
+using Aluguel.API.AutoMapperProfiles;
+using Aluguel.API.Controllers;
+using Aluguel.API.Services;
+using Aluguel.API.ViewModels;
+using FluentAssertions;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
 
-//namespace Aluguel.Tests;
+namespace Aluguel.Tests;
 
-//public class CiclistaControllerTest
-//{
-//    private readonly Mock<ILogger<CiclistaController>> _logger = new();
-//    [Fact]
-//    public void CreateOnSuccessReturnStatusCode200()
-//    {
-//        var myProfile = new CiclistaAutoMapperProfile();
-//        var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
-//        var mapper = new Mapper(configuration);
+public class CiclistaControllerTest
+{
+    private readonly Mock<ILogger<CiclistaController>> _logger = new();
+    private readonly Mock<IAluguelService> _aluguel = new();
 
-//        var alugueMockService = new Mock<IAluguelService>();
-//        var ciclistaMockService = new Mock<ICiclistaService>();
-//        ciclistaMockService.Setup(service => service.CreateCiclista(CiclistaMockData.GetCiclistaMockData())).Returns(new CiclistaViewModel());
+    [Fact]
+    public void CreateOnSuccessReturnStatusCode200()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.CreateCiclista(It.IsAny<CiclistaInsertViewModel>())).Returns(new CiclistaViewModel());
 
-//        var sut = new CiclistaController(_logger.Object, ciclistaMockService.Object, alugueMockService.Object);
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
 
-//        var result = (OkObjectResult)sut.Create(CiclistaMockData.GetCiclistaMockData());
+        var result = (OkObjectResult)sut.Create(new CiclistaInsertViewModel());
 
-//        result.StatusCode.Should().Be(200);
-//    }
+        result.StatusCode.Should().Be(200);
+    }
 
-//    //[Fact]
-//    //public void EditOnSuccessReturnStatusCode200()
-//    //{
-//    //    var myProfile = new CiclistaAutoMapperProfile();
-//    //    var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
-//    //    var mapper = new Mapper(configuration);
+    [Fact]
+    public void CreateOnErrorReturnStatusCode400()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
 
-//    //    var mockLogger = new Mock<ILogger<CiclistaController>>();
-//    //    var mockService = new Mock<ICiclistaService>();
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
 
-//    //    mockService.Setup(service => service.GetCiclista()).Returns(CiclistaMockData.GetCiclistaViewModelMockData());
+        var result = (BadRequestResult)sut.Create(new CiclistaInsertViewModel());
 
-//    //    var sut = new CiclistaController(mockLogger.Object, mapper, mockService.Object);
+        result.StatusCode.Should().Be(400);
+    }
 
-//    //    var result = (OkObjectResult)sut.Edit(CiclistaMockData.GetCiclistaEditMockData(), 0);
+    [Fact]
+    public void GetOnSuccessReturnStatusCode200()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.Contains(It.IsAny<int>())).Returns(true);
+        mockCiclistaService.Setup(service => service.GetCiclista(It.IsAny<int>())).Returns(new CiclistaViewModel());
 
-//    //    result.StatusCode.Should().Be(200);
-//    //}
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
 
-//    //[Fact]
-//    //public void EnableciclistaOnSuccessReturnStatusCode200()
-//    //{
-//    //    var mockMapper = new Mock<IMapper>();
-//    //    var mockLogger = new Mock<ILogger<CiclistaController>>();
-//    //    var mockService = new Mock<ICiclistaService>();
-//    //    mockService.Setup(service => service.GetCiclista()).Returns(new CiclistaViewModel());
+        var result = (OkObjectResult)sut.Get(0);
 
-//    //    var sut = new CiclistaController(mockLogger.Object, mockMapper.Object, mockService.Object);
+        result.StatusCode.Should().Be(200);
+    }
 
-//    //    var result = (OkObjectResult)sut.EnableCiclista("000", 0);
+    [Fact]
+    public void GetOnErrorReturnStatusCode404()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.Contains(It.IsAny<int>())).Returns(false);
 
-//    //    result.StatusCode.Should().Be(200);
-//    //}
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
 
-//    //[Fact]
-//    //public void EditCartaoOnSucessReturnsStatusCode200()
-//    //{
-//    //    var myProfile = new CiclistaAutoMapperProfile();
-//    //    var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
-//    //    var mapper = new Mapper(configuration);
+        var result = (NotFoundResult)sut.Get(0);
 
-//    //    var mockLogger = new Mock<ILogger<CiclistaController>>();
-//    //    var mockService = new Mock<ICiclistaService>();
+        result.StatusCode.Should().Be(404);
+    }
 
-//    //    mockService.Setup(service => service.GetCiclista()).Returns(CiclistaMockData.GetCiclistaViewModelMockData());
+    [Fact]
+    public void ActivateOnSuccessReturnStatusCode200()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.Contains(It.IsAny<int>())).Returns(true);
+        mockCiclistaService.Setup(service => service.Activate(It.IsAny<int>())).Returns(new CiclistaViewModel());
 
-//    //    var sut = new CiclistaController(mockLogger.Object, mapper, mockService.Object);
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
 
-//    //    var result = (OkObjectResult)sut.EditCartao(CiclistaMockData.GetMeiodeDePagamentoMockData(), 0);
+        var result = (OkObjectResult)sut.Get(0);
 
-//    //    result.StatusCode.Should().Be(200);
+        result.StatusCode.Should().Be(200);
+    }
 
-//    //}
+    [Fact]
+    public void ActivateOnErrorReturnStatusCode404()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.Contains(It.IsAny<int>())).Returns(false);
 
-//    //[Fact]
-//    //public void CiclistaServiceGetCiclistaReturnsCiclistaViewModel()
-//    //{
-//    //    var service = new CiclistaService();
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
 
-//    //    var sut = service.GetCiclista();
+        var result = (NotFoundResult)sut.Get(0);
 
-//    //    Assert.IsType<CiclistaViewModel>(sut);
-//    //}
+        result.StatusCode.Should().Be(404);
+    }
 
-//}
+    [Fact]
+    public void CheckAluguelOnSuccessTrueReturnStatusCode200()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.Contains(It.IsAny<int>())).Returns(true);
+        mockAluguelService.Setup(service => service.GetAluguelAtivo(It.IsAny<int>())).Returns(new AluguelViewModel());
+
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
+
+        var result = (OkObjectResult)sut.CheckAluguel(0);
+
+        result.StatusCode.Should().Be(200);
+    }
+
+    [Fact]
+    public void CheckAluguelOnErrorReturnStatusCode404()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.Contains(It.IsAny<int>())).Returns(false);
+
+
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
+
+        var result = (NotFoundResult)sut.CheckAluguel(0);
+
+        result.StatusCode.Should().Be(404);
+    }
+
+    [Fact]
+    public void GetBicicletaOnSuccessTrueReturnStatusCode200()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.Contains(It.IsAny<int>())).Returns(true);
+        mockAluguelService.Setup(service => service.GetAluguelAtivo(It.IsAny<int>())).Returns(new AluguelViewModel());
+
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
+
+        var result = (OkObjectResult)sut.GetBicicleta(0);
+
+        result.StatusCode.Should().Be(200);
+    }
+
+    [Fact]
+    public void GetBicicletaOnErrorReturnStatusCode404()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.Contains(It.IsAny<int>())).Returns(false);
+
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
+
+        var result = (NotFoundResult)sut.GetBicicleta(0);
+
+        result.StatusCode.Should().Be(404);
+    }
+
+    [Fact]
+    public void CheckEmailOnSuccessTrueReturnStatusCode200()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.IsEmailRegistered(It.IsAny<string>())).Returns(true);
+
+        var mockLogger = new Mock<ILogger<CiclistaController>>();
+
+        var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
+
+        var result = sut.CheckEmail("string");
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void CheckEmailOnErrorReturnStatusCode404()
+    {
+        var mockCiclistaService = new Mock<ICiclistaService>();
+        var mockAluguelService = new Mock<IAluguelService>();
+        mockCiclistaService.Setup(service => service.IsEmailRegistered(It.IsAny<string>())).Returns(false);
+
+        var mockLogger = new Mock<ILogger<CiclistaController>>();
+
+        var sut = new CiclistaController(mockLogger.Object, mockCiclistaService.Object, _aluguel.Object);
+
+        var result = sut.CheckEmail("string");
+
+        Assert.False(result);
+    }
+
+}
