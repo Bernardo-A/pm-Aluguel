@@ -37,4 +37,18 @@ namespace Aluguel.API.ViewModels
 
     }
 
+    public class CobrancaDto
+    {
+        public decimal Valor { get; set; }
+        public int Ciclista { get; set; }
+    }
+
+    public class CartaoDto
+    {
+        public string? CardNumber { get; set; }
+        public string? Holder { get; set; }
+        public string? ExpirationDate { get; set; }
+        public string? SecurityCode { get; set; }
+    }
+
 }

@@ -14,7 +14,7 @@ namespace Aluguel.API.ViewModels
         public string? UrlFotoDocumento { get; set; }
         public string? Senha { get; set; }
 
-        public  MeioDePagamentoViewModel? MeioDePagamento { get; set; }
+        public required MeioDePagamentoViewModel MeioDePagamento { get; set; }
 
         public bool EmailConfirmado { get; set; } = false;
     }
@@ -31,7 +31,7 @@ namespace Aluguel.API.ViewModels
         public string? UrlFotoDocumento { get; set; }
         public string? Senha { get; set; }
 
-        public  MeioDePagamentoViewModel? MeioDePagamento { get; set; }
+        public  MeioDePagamentoViewModel MeioDePagamento { get; set; }
     }
 
     public class CiclistaEditViewModel

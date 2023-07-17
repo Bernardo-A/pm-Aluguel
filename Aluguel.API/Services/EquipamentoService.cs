@@ -7,12 +7,12 @@ namespace Aluguel.API.Services
 {
     public interface IEquipamentoService
     {
-        public TrancaViewModel GetTranca(int id);
+        public Task<TrancaViewModel> GetTranca(int id);
     }
 
     public class EquipamentoService : IEquipamentoService
     {     
-        public TrancaViewModel GetTranca(int id)
+        public async Task<TrancaViewModel> GetTranca(int id)
         {
             return new TrancaViewModel
             {

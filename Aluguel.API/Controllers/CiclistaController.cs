@@ -25,15 +25,18 @@ public class CiclistaController : ControllerBase
 
     [HttpPost]
     [Route("")]
-    public IActionResult Create([FromBody] CiclistaInsertViewModel Ciclista)
+    public async Task<IActionResult> Create([FromBody] CiclistaInsertViewModel Ciclista)
     {
         _logger.LogInformation("Criando ciclista...");
-        var result = _CiclistaService.CreateCiclista(Ciclista);
-        if (result != null)
+        try
         {
+            var result = await _CiclistaService.CreateCiclista(Ciclista);
             return Ok(result);
+        } catch (Exception ex)
+        {
+            _logger.LogError("Erro ao criar ciclista", ex);
+            return BadRequest();
         }
-        return BadRequest();
     }
 
     [HttpGet]
@@ -49,7 +52,7 @@ public class CiclistaController : ControllerBase
 
     [HttpPost]
     [Route("{id}/ativar")]
-    public IActionResult Activate (int id)
+    public IActionResult Activate(int id)
     {
         if (_CiclistaService.Contains(id))
         {
@@ -62,7 +65,7 @@ public class CiclistaController : ControllerBase
 
     [HttpGet]
     [Route("{id}/permiteAluguel")]
-    public IActionResult CheckAluguel (int id)
+    public IActionResult CheckAluguel(int id)
     {
         if (_CiclistaService.Contains(id))
         {
@@ -78,7 +81,7 @@ public class CiclistaController : ControllerBase
 
     [HttpGet]
     [Route("{id}/bicicletaAlugada")]
-    public IActionResult GetBicicleta (int id)
+    public IActionResult GetBicicleta(int id)
     {
         if (_CiclistaService.Contains(id))
         {
@@ -93,9 +96,13 @@ public class CiclistaController : ControllerBase
 
     [HttpGet]
     [Route("existeEmail/{email}")]
-    public bool CheckEmail(string email)
+    public IActionResult CheckEmail(string email)
     {
-        return _CiclistaService.IsEmailRegistered(email);
+        if (_CiclistaService.IsEmailRegistered(email))
+        {
+            return Conflict();
+        }
+        return Ok();
     }
 
     [HttpPut]

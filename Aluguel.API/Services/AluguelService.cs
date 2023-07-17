@@ -2,12 +2,14 @@ using AutoMapper;
 using Aluguel.API.ViewModels;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Text;
 
 namespace Aluguel.API.Services
 {
     public interface IAluguelService
     {
-        public AluguelViewModel? CreateAluguel(AluguelInsertViewModel aluguel);
+        public Task CreateAluguel(AluguelInsertViewModel aluguel);
         public AluguelViewModel GetAluguel(int id);
         public bool Contains(int id);
         public List<AluguelViewModel> GetAll();
@@ -21,37 +23,57 @@ namespace Aluguel.API.Services
         private readonly ICiclistaService _CiclistaService;
         private readonly IEquipamentoService _EquipamentoService;
 
+        private readonly HttpClient HttpClient = new();
+
+        private const string externoAPI = "https://pmexterno.herokuapp.com";
+
         public AluguelService(ICiclistaService ciclistaService, IEquipamentoService equipamentoService)
         {
             _CiclistaService = ciclistaService;
             _EquipamentoService = equipamentoService;
         }
 
-        public AluguelViewModel? CreateAluguel(AluguelInsertViewModel aluguel)
+        public async Task CreateAluguel(AluguelInsertViewModel aluguel)
         {
             if (_CiclistaService.Contains(aluguel.CiclistaId))
             {
                 var ciclista = _CiclistaService.GetCiclista(aluguel.CiclistaId);
-                if (GetAluguelAtivo(ciclista.Id) != null)
+                if (ciclista.EmailConfirmado)
                 {
-                    return null;
+                    if (GetAluguelAtivo(ciclista.Id) != null)
+                    {
+                        throw new Exception();
+                    }
+
+                    var requestBody = JsonConvert.SerializeObject(new CobrancaDto
+                    {
+                        Valor = 10,
+                        Ciclista = aluguel.CiclistaId
+                    });
+
+                    var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+
+                    var response = await HttpClient.PostAsync(externoAPI + "/cobranca", content);
+
+                    response.EnsureSuccessStatusCode();
+
+                    var tranca = _EquipamentoService.GetTranca(aluguel.TrancaId);
+                    if (tranca.BicicletaId == null)
+                    {
+                        throw new Exception();
+                    }
+                    var result = new AluguelViewModel()
+                    {
+                        CiclistaId = ciclista.Id,
+                        Id = dict.Count,
+                        TrancaInicio = tranca.Id,
+                        BicicletaId = tranca.BicicletaId
+                    };
+                    dict.Add(dict.Count, result);
+                    return;
                 }
-                var tranca = _EquipamentoService.GetTranca(aluguel.TrancaId);
-                if (tranca.BicicletaId == null)
-                {
-                    return null;
-                }
-                var result = new AluguelViewModel()
-                {
-                    CiclistaId = ciclista.Id,
-                    Id = dict.Count,
-                    TrancaInicio = tranca.Id,
-                    BicicletaId = tranca.BicicletaId
-                };
-                dict.Add(dict.Count, result);
-                return result;
             }
-            return null;
+            throw new Exception();
         }
 
         public AluguelViewModel? GetAluguelAtivo(int ciclistaId)
