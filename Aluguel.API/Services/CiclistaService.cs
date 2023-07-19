@@ -7,14 +7,14 @@ namespace Aluguel.API.Services
 {
     public interface ICiclistaService
     {
-        public Task<CiclistaViewModel> CreateCiclista(CiclistaInsertViewModel Ciclista);
+        public Task<CiclistaViewModel?> CreateCiclista(CiclistaInsertViewModel Ciclista);
         public CiclistaViewModel GetCiclista(int id);
-        public CiclistaViewModel UpdateCiclista(CiclistaEditViewModel ciclistaNovo, int id);
+        public Task<CiclistaViewModel> UpdateCiclista(CiclistaEditViewModel ciclistaNovo, int id);
         public bool Contains(int id);
         public List<CiclistaViewModel> GetAll();
         public CiclistaViewModel Activate(int id);
         public bool IsEmailRegistered(string email);
-        public CiclistaViewModel UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id);
+        public Task<CiclistaViewModel> UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id);
     }
 
     public class CiclistaService : ICiclistaService
@@ -32,14 +32,14 @@ namespace Aluguel.API.Services
             _mapper = mapper;
         }
 
-        public async Task<CiclistaViewModel> CreateCiclista(CiclistaInsertViewModel Ciclista)
+        public async Task<CiclistaViewModel?> CreateCiclista(CiclistaInsertViewModel Ciclista)
         {
             var cartao = new MeioDePagamentoViewModel
             {
-                Numero = Ciclista.MeioDePagamento.Numero,
-                NomeTitular = Ciclista.MeioDePagamento.NomeTitular,
-                Validade = Ciclista.MeioDePagamento.Validade,
-                CVV = Ciclista.MeioDePagamento.CVV
+                Numero = Ciclista?.MeioDePagamento?.Numero,
+                NomeTitular = Ciclista?.MeioDePagamento?.NomeTitular,
+                Validade = Ciclista?.MeioDePagamento?.Validade,
+                CVV = Ciclista?.MeioDePagamento?.CVV
             };
 
             var request = JsonContent.Create(cartao);
@@ -48,10 +48,21 @@ namespace Aluguel.API.Services
 
              response.EnsureSuccessStatusCode();
 
+            if (Ciclista != null)
+            {
             var result = _mapper.Map<CiclistaInsertViewModel, CiclistaViewModel>(Ciclista);
             result.Id = dict.Count;
             dict.Add(dict.Count, result);
+            var body = JsonContent.Create(new EmailDto
+            {
+                Email = Ciclista?.Email,
+                Assunto = "Conta criada com sucesso!",
+                Mensagem = "https://pmexterno.herokuapp.com/ciclista/" + dict.Count + "/ativar"
+            });
+            await HttpClient.PostAsync(externoAPI + "/enviarEmail", body);
             return (result);
+            }
+            return null;
         }
 
         public CiclistaViewModel GetCiclista(int id)
@@ -59,19 +70,35 @@ namespace Aluguel.API.Services
             return dict.ElementAt(id).Value;
         }
 
-        public CiclistaViewModel UpdateCiclista(CiclistaEditViewModel ciclistaNovo, int id)
+        public async Task<CiclistaViewModel> UpdateCiclista(CiclistaEditViewModel ciclistaNovo, int id)
         {
             var ciclistaAntigo = dict.ElementAt(id).Value;
             var result = _mapper.Map(ciclistaNovo, ciclistaAntigo);
             dict[id] = result;
+            var body = JsonContent.Create(new EmailDto
+            {
+                Email = ciclistaAntigo?.Email,
+                Assunto = "Perfil editado",
+                Mensagem = "Seu perfil foi salvo com os novos dados cadastrais."
+            });
+
+            await HttpClient.PostAsync(externoAPI + "/enviarEmail", body);
             return (result);
         }
 
-        public CiclistaViewModel UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id)
+        public async Task<CiclistaViewModel> UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id)
         {
             var ciclista = dict.ElementAt(id).Value;
             ciclista.MeioDePagamento = cartaoNovo;
             dict[id] = ciclista;
+            var body = JsonContent.Create(new EmailDto
+            {
+                Email = ciclista?.Email,
+                Assunto = "Cartão atualizado",
+                Mensagem = "Seu cartão foi salvo com os novos dados cadastrais."
+            });
+
+            await HttpClient.PostAsync(externoAPI + "/enviarEmail", body);
             return (ciclista);
         }
 

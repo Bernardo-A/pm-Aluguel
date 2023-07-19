@@ -107,12 +107,12 @@ public class CiclistaController : ControllerBase
 
     [HttpPut]
     [Route("{id}")]
-    public IActionResult Edit([FromBody] CiclistaEditViewModel CiclistaNovo, int id)
+    public async Task<IActionResult> Edit([FromBody] CiclistaEditViewModel CiclistaNovo, int id)
     {
         _logger.LogInformation("Alterando ciclista...");
         if (_CiclistaService.Contains(id))
         {
-            var result = _CiclistaService.UpdateCiclista(CiclistaNovo, id);
+            var result = await _CiclistaService.UpdateCiclista(CiclistaNovo, id);
             return Ok(result);
         }
         return NotFound();

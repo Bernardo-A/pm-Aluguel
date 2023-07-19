@@ -23,7 +23,6 @@ namespace Aluguel.API.Services
     {
         private static readonly Dictionary<int, AluguelViewModel> dict = new();
         private readonly ICiclistaService _CiclistaService;
-        private readonly IEquipamentoService _EquipamentoService;
 
         private readonly HttpClient HttpClient = new();
         private const string equipamentoAddress = "https://pmequipamento.herokuapp.com";
@@ -31,10 +30,9 @@ namespace Aluguel.API.Services
 
         private const string externoAPI = "https://pmexterno.herokuapp.com";
 
-        public AluguelService(ICiclistaService ciclistaService, IEquipamentoService equipamentoService)
+        public AluguelService(ICiclistaService ciclistaService)
         {
             _CiclistaService = ciclistaService;
-            _EquipamentoService = equipamentoService;
         }
 
         public async Task<AluguelViewModel?> CreateAluguel(AluguelInsertViewModel aluguel)
@@ -46,12 +44,20 @@ namespace Aluguel.API.Services
                 {
                     if (GetAluguelAtivo(ciclista.Id) != null)
                     {
+                        var bodyEmail = JsonContent.Create(new EmailDto
+                        {
+                            Email = ciclista?.Email,
+                            Assunto = "Aluguel encontrado",
+                            Mensagem = "Aluguel ativo encontrado, não é possível alugar novamente."
+                        });
+
+                        await HttpClient.PostAsync(externoAPI + "/enviarEmail", bodyEmail);
                         throw new Exception();
                     }
                     var responseTranca = await HttpClient.GetAsync(equipamentoAddress + "/tranca/" + aluguel.TrancaId);
                     responseTranca.EnsureSuccessStatusCode();
                     var tranca = await responseTranca.Content.ReadFromJsonAsync<TrancaViewModel>();
-                    if (tranca.Bicicleta == null)
+                    if (tranca?.Bicicleta == null || tranca?.Bicicleta.Status == "EMREPARO")
                     {
                         throw new Exception();
                     }
@@ -145,7 +151,7 @@ namespace Aluguel.API.Services
                         var body = JsonContent.Create(new CobrancaDto
                         {
                             Valor = 10,
-                            Ciclista = value.CiclistaId.Value
+                            Ciclista = value.CiclistaId
                         });
 
 

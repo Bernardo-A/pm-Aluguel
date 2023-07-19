@@ -3,7 +3,7 @@ namespace Aluguel.API.ViewModels
     public class AluguelViewModel
     {
         public int Id { get; set; }
-        public int? CiclistaId { get; set; }
+        public int CiclistaId { get; set; }
         public int? BicicletaId { get; set; }
         public DateTime DataAluguel { get; set; } = DateTime.Now;
         public DateTime? DataDevolucao { get; set; }
@@ -62,6 +62,13 @@ namespace Aluguel.API.ViewModels
         public string? Holder { get; set; }
         public string? ExpirationDate { get; set; }
         public string? SecurityCode { get; set; }
+    }
+
+    public class EmailDto
+    {
+        public string? Email { get; set; }
+        public string? Assunto { get; set; }
+        public string? Mensagem { get; set; }
     }
 
 }
