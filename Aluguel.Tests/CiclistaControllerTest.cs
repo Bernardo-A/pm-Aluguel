@@ -27,7 +27,7 @@ public class CiclistaControllerTest
 
         var result = await sut.Create(new CiclistaInsertViewModel()) as OkObjectResult;
 
-        result.StatusCode.Should().Be(200);
+        result?.StatusCode.Should().Be(200);
     }
 
     [Fact]
@@ -39,11 +39,11 @@ public class CiclistaControllerTest
 
         var result = await sut.Create(new CiclistaInsertViewModel()) as BadRequestResult;
 
-        result.StatusCode.Should().Be(400);
+        result?.StatusCode.Should().Be(400);
     }
 
     [Fact]
-    public async void GetOnSuccessReturnStatusCode200()
+    public void GetOnSuccessReturnStatusCode200()
     {
         var mockCiclistaService = new Mock<ICiclistaService>();
         var mockAluguelService = new Mock<IAluguelService>();
@@ -160,7 +160,7 @@ public class CiclistaControllerTest
     }
 
     [Fact]
-    public async void CheckEmailOnSuccessTrueReturnStatusCode200()
+    public void CheckEmailOnSuccessTrueReturnStatusCode200()
     {
         var mockCiclistaService = new Mock<ICiclistaService>();
         var mockAluguelService = new Mock<IAluguelService>();

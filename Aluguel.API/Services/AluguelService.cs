@@ -52,14 +52,14 @@ namespace Aluguel.API.Services
                         });
 
                         await HttpClient.PostAsync(externoAPI + "/enviarEmail", bodyEmail);
-                        throw new Exception();
+                        return null;
                     }
                     var responseTranca = await HttpClient.GetAsync(equipamentoAddress + "/tranca/" + aluguel.TrancaId);
                     responseTranca.EnsureSuccessStatusCode();
                     var tranca = await responseTranca.Content.ReadFromJsonAsync<TrancaViewModel>();
                     if (tranca?.Bicicleta == null || tranca?.Bicicleta.Status == "EMREPARO")
                     {
-                        throw new Exception();
+                        return null;
                     }
 
                     var body = JsonContent.Create(new CobrancaDto
@@ -73,11 +73,17 @@ namespace Aluguel.API.Services
 
                     response.EnsureSuccessStatusCode();
 
-                    int bicicleta = tranca.Bicicleta.Id;
-                    var bodyTranca = JsonContent.Create(bicicleta);
-                    var destranca = await HttpClient.PostAsync(equipamentoAddress + "/tranca/" + aluguel.TrancaId + "/destrancar/", bodyTranca);
-                    destranca.EnsureSuccessStatusCode();
-
+                    if (tranca != null)
+                    {
+                        int bicicleta = tranca.Bicicleta.Id;
+                        var bodyTranca = JsonContent.Create(bicicleta);
+                        var destranca = await HttpClient.PostAsync(equipamentoAddress + "/tranca/" + aluguel.TrancaId + "/destrancar/", bodyTranca);
+                        destranca.EnsureSuccessStatusCode();
+                    } else
+                    {
+                        return null;
+                    }
+                   
                     var result = new AluguelViewModel()
                     {
                         CiclistaId = ciclista.Id,

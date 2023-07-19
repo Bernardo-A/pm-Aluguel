@@ -86,7 +86,7 @@ namespace Aluguel.API.Services
             return (result);
         }
 
-        public async Task<CiclistaViewModel> UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id)
+        public async Task<CiclistaViewModel?> UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id)
         {
             var ciclista = dict.ElementAt(id).Value;
             ciclista.MeioDePagamento = cartaoNovo;
@@ -99,7 +99,8 @@ namespace Aluguel.API.Services
             });
 
             await HttpClient.PostAsync(externoAPI + "/enviarEmail", body);
-            return (ciclista);
+            if (ciclista != null) { return (ciclista); }
+            else { return null;  }
         }
 
         public CiclistaViewModel Activate (int id)
