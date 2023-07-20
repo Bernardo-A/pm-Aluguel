@@ -17,30 +17,29 @@ public class CiclistaControllerTest
     private readonly Mock<IAluguelService> _aluguel = new();
 
     [Fact]
-    public void CreateOnSuccessReturnStatusCode200()
+    public async void CreateOnSuccessReturnStatusCode200()
     {
         var mockCiclistaService = new Mock<ICiclistaService>();
         var mockAluguelService = new Mock<IAluguelService>();
-        mockCiclistaService.Setup(service => service.CreateCiclista(It.IsAny<CiclistaInsertViewModel>())).Returns(new CiclistaViewModel());
+        mockCiclistaService.Setup(service => service.CreateCiclista(It.IsAny<CiclistaInsertViewModel>())).ReturnsAsync(new CiclistaViewModel());
 
         var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
 
-        var result = (OkObjectResult)sut.Create(new CiclistaInsertViewModel());
+        var result = await sut.Create(new CiclistaInsertViewModel()) as OkObjectResult;
 
-        result.StatusCode.Should().Be(200);
+        result?.StatusCode.Should().Be(200);
     }
 
     [Fact]
-    public void CreateOnErrorReturnStatusCode400()
+    public async void CreateOnErrorReturnStatusCode400()
     {
         var mockCiclistaService = new Mock<ICiclistaService>();
-        var mockAluguelService = new Mock<IAluguelService>();
 
         var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
 
-        var result = (BadRequestResult)sut.Create(new CiclistaInsertViewModel());
+        var result = await sut.Create(new CiclistaInsertViewModel()) as BadRequestResult;
 
-        result.StatusCode.Should().Be(400);
+        result?.StatusCode.Should().Be(400);
     }
 
     [Fact]
@@ -171,9 +170,9 @@ public class CiclistaControllerTest
 
         var sut = new CiclistaController(_logger.Object, mockCiclistaService.Object, _aluguel.Object);
 
-        var result = sut.CheckEmail("string");
+        var result = (OkObjectResult)sut.CheckEmail("string");
 
-        Assert.True(result);
+        result.StatusCode.Should().Be(200);
     }
 
     [Fact]
@@ -187,9 +186,9 @@ public class CiclistaControllerTest
 
         var sut = new CiclistaController(mockLogger.Object, mockCiclistaService.Object, _aluguel.Object);
 
-        var result = sut.CheckEmail("string");
+        var result = (NotFoundResult)sut.CheckEmail("string");
 
-        Assert.False(result);
+        result.StatusCode.Should().Be(404);
     }
 
 }

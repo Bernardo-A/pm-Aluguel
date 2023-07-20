@@ -16,26 +16,33 @@ public class AluguelController : ControllerBase
 
     [HttpPost]
     [Route("")]
-    public IActionResult Create([FromBody] AluguelInsertViewModel aluguel)
+    public async Task<IActionResult> Create([FromBody] AluguelInsertViewModel aluguel)
     {
-        var result = _AluguelService.CreateAluguel(aluguel);
-        if (result != null)
+        try 
         {
+            var result = await _AluguelService.CreateAluguel(aluguel);
+            if (result == null) { return BadRequest(); }
             return Ok(result);
-        }
-        return BadRequest();
+        }catch { return BadRequest(); }
+        
     }
 
     [HttpPost]
     [Route("/devolucao")]
-    public IActionResult Retrieve([FromBody] AluguelRetrieveViewModel aluguel)
+    public async Task<IActionResult> Retrieve([FromBody] AluguelRetrieveViewModel aluguel)
     {
-        var result = _AluguelService.Devolver(aluguel);
-        if (result != null)
+        try
         {
-            return Ok(result);
+            var result = await _AluguelService.Devolver(aluguel);
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return NotFound();
+        } catch
+        {
+            return BadRequest();
         }
-        return NotFound();
     }
 
 

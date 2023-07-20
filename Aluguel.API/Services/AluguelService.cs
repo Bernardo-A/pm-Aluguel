@@ -2,54 +2,98 @@ using AutoMapper;
 using Aluguel.API.ViewModels;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Text;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.Diagnostics;
 
 namespace Aluguel.API.Services
 {
     public interface IAluguelService
     {
-        public AluguelViewModel? CreateAluguel(AluguelInsertViewModel aluguel);
+        public Task<AluguelViewModel?> CreateAluguel(AluguelInsertViewModel aluguel);
         public AluguelViewModel GetAluguel(int id);
         public bool Contains(int id);
         public List<AluguelViewModel> GetAll();
         public AluguelViewModel? GetAluguelAtivo(int ciclistaId);
-        public AluguelViewModel? Devolver(AluguelRetrieveViewModel aluguel);
+        public Task<AluguelViewModel?> Devolver(AluguelRetrieveViewModel aluguel);
     }
 
     public class AluguelService : IAluguelService
     {
         private static readonly Dictionary<int, AluguelViewModel> dict = new();
         private readonly ICiclistaService _CiclistaService;
-        private readonly IEquipamentoService _EquipamentoService;
 
-        public AluguelService(ICiclistaService ciclistaService, IEquipamentoService equipamentoService)
+        private readonly HttpClient HttpClient = new();
+        private const string equipamentoAddress = "https://pmequipamento.herokuapp.com";
+
+
+        private const string externoAPI = "https://pmexterno.herokuapp.com";
+
+        public AluguelService(ICiclistaService ciclistaService)
         {
             _CiclistaService = ciclistaService;
-            _EquipamentoService = equipamentoService;
         }
 
-        public AluguelViewModel? CreateAluguel(AluguelInsertViewModel aluguel)
+        public async Task<AluguelViewModel?> CreateAluguel(AluguelInsertViewModel aluguel)
         {
             if (_CiclistaService.Contains(aluguel.CiclistaId))
             {
                 var ciclista = _CiclistaService.GetCiclista(aluguel.CiclistaId);
-                if (GetAluguelAtivo(ciclista.Id) != null)
+                if (ciclista.EmailConfirmado)
                 {
-                    return null;
+                    if (GetAluguelAtivo(ciclista.Id) != null)
+                    {
+                        var bodyEmail = JsonContent.Create(new EmailDto
+                        {
+                            Email = ciclista?.Email,
+                            Assunto = "Aluguel encontrado",
+                            Mensagem = "Aluguel ativo encontrado, não é possível alugar novamente."
+                        });
+
+                        await HttpClient.PostAsync(externoAPI + "/enviarEmail", bodyEmail);
+                        return null;
+                    }
+                    var responseTranca = await HttpClient.GetAsync(equipamentoAddress + "/tranca/" + aluguel.TrancaId);
+                    responseTranca.EnsureSuccessStatusCode();
+                    var tranca = await responseTranca.Content.ReadFromJsonAsync<TrancaViewModel>();
+                    if (tranca?.Bicicleta == null || tranca?.Bicicleta.Status == "EMREPARO")
+                    {
+                        return null;
+                    }
+
+                    var body = JsonContent.Create(new CobrancaDto
+                    {
+                        Valor = 10,
+                        Ciclista = aluguel.CiclistaId
+                    });
+
+
+                    var response = await HttpClient.PostAsync(externoAPI + "/cobranca", body);
+
+                    response.EnsureSuccessStatusCode();
+
+                    if (tranca?.Bicicleta != null)
+                    {
+                        int bicicleta = tranca.Bicicleta.Id;
+                        var bodyTranca = JsonContent.Create(bicicleta);
+                        var destranca = await HttpClient.PostAsync(equipamentoAddress + "/tranca/" + aluguel.TrancaId + "/destrancar/", bodyTranca);
+                        destranca.EnsureSuccessStatusCode();
+                        var result = new AluguelViewModel()
+                        {
+                            CiclistaId = ciclista.Id,
+                            Id = dict.Count,
+                            TrancaInicio = tranca.Id,
+                            BicicletaId = tranca.Bicicleta.Id
+                        };
+                        dict.Add(dict.Count, result);
+                        return result;  
+                    } else
+                    {
+                        return null;
+                    }
+                   
                 }
-                var tranca = _EquipamentoService.GetTranca(aluguel.TrancaId);
-                if (tranca.BicicletaId == null)
-                {
-                    return null;
-                }
-                var result = new AluguelViewModel()
-                {
-                    CiclistaId = ciclista.Id,
-                    Id = dict.Count,
-                    TrancaInicio = tranca.Id,
-                    BicicletaId = tranca.BicicletaId
-                };
-                dict.Add(dict.Count, result);
-                return result;
             }
             return null;
         }
@@ -92,7 +136,7 @@ namespace Aluguel.API.Services
             return result;
         }
 
-        public AluguelViewModel? Devolver(AluguelRetrieveViewModel aluguel)
+        public async Task<AluguelViewModel?> Devolver(AluguelRetrieveViewModel aluguel)
         {
             Dictionary<int, AluguelViewModel>.ValueCollection objects = dict.Values;
             foreach (var value in objects)
@@ -101,6 +145,26 @@ namespace Aluguel.API.Services
                 {
                     value.DataDevolucao = DateTime.Now;
                     value.TrancaFim = aluguel.TrancaId;
+
+                    int bicicleta = value.BicicletaId.Value;
+                    var bodyTranca = JsonContent.Create(bicicleta);
+                    var tranca = await HttpClient.PostAsync(equipamentoAddress + "/tranca/" + aluguel.TrancaId + "/trancar/", bodyTranca);
+                    tranca.EnsureSuccessStatusCode();
+
+                    var time = (value.DataDevolucao.Value - value.DataAluguel).TotalMinutes;
+                    if (time >= 120)
+                    {
+                        var body = JsonContent.Create(new CobrancaDto
+                        {
+                            Valor = (decimal)(5 *(time / 30)),
+                            Ciclista = value.CiclistaId
+                        });
+
+
+                        var response = await HttpClient.PostAsync(externoAPI + "/cobranca", body);
+
+                        response.EnsureSuccessStatusCode();
+                    }
                     return value;
                 }
             }

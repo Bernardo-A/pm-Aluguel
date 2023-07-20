@@ -25,15 +25,18 @@ public class CiclistaController : ControllerBase
 
     [HttpPost]
     [Route("")]
-    public IActionResult Create([FromBody] CiclistaInsertViewModel Ciclista)
+    public async Task<IActionResult> Create([FromBody] CiclistaInsertViewModel Ciclista)
     {
         _logger.LogInformation("Criando ciclista...");
-        var result = _CiclistaService.CreateCiclista(Ciclista);
-        if (result != null)
+        try
         {
+            var result = await _CiclistaService.CreateCiclista(Ciclista);
             return Ok(result);
+        } catch (Exception ex)
+        {
+            _logger.LogError("Erro ao criar ciclista", ex);
+            return BadRequest();
         }
-        return BadRequest();
     }
 
     [HttpGet]
@@ -49,7 +52,7 @@ public class CiclistaController : ControllerBase
 
     [HttpPost]
     [Route("{id}/ativar")]
-    public IActionResult Activate (int id)
+    public IActionResult Activate(int id)
     {
         if (_CiclistaService.Contains(id))
         {
@@ -62,7 +65,7 @@ public class CiclistaController : ControllerBase
 
     [HttpGet]
     [Route("{id}/permiteAluguel")]
-    public IActionResult CheckAluguel (int id)
+    public IActionResult CheckAluguel(int id)
     {
         if (_CiclistaService.Contains(id))
         {
@@ -78,7 +81,7 @@ public class CiclistaController : ControllerBase
 
     [HttpGet]
     [Route("{id}/bicicletaAlugada")]
-    public IActionResult GetBicicleta (int id)
+    public IActionResult GetBicicleta(int id)
     {
         if (_CiclistaService.Contains(id))
         {
@@ -93,19 +96,23 @@ public class CiclistaController : ControllerBase
 
     [HttpGet]
     [Route("existeEmail/{email}")]
-    public bool CheckEmail(string email)
+    public IActionResult CheckEmail(string email)
     {
-        return _CiclistaService.IsEmailRegistered(email);
+        if (_CiclistaService.IsEmailRegistered(email))
+        {
+            return Conflict();
+        }
+        return Ok();
     }
 
     [HttpPut]
     [Route("{id}")]
-    public IActionResult Edit([FromBody] CiclistaEditViewModel CiclistaNovo, int id)
+    public async Task<IActionResult> Edit([FromBody] CiclistaEditViewModel CiclistaNovo, int id)
     {
         _logger.LogInformation("Alterando ciclista...");
         if (_CiclistaService.Contains(id))
         {
-            var result = _CiclistaService.UpdateCiclista(CiclistaNovo, id);
+            var result = await _CiclistaService.UpdateCiclista(CiclistaNovo, id);
             return Ok(result);
         }
         return NotFound();
@@ -126,12 +133,12 @@ public class CiclistaController : ControllerBase
 
     [HttpPut]
     [Route("/cartaoDeCredito/{id}")]
-    public IActionResult EditCard([FromBody] MeioDePagamentoViewModel cartaoNovo, int id)
+    public async Task<IActionResult> EditCard([FromBody] MeioDePagamentoViewModel cartaoNovo, int id)
     {
         _logger.LogInformation("Alterando cartão do ciclista...");
         if (_CiclistaService.Contains(id))
         {
-            var result = _CiclistaService.UpdateCartao(cartaoNovo, id);
+            var result = await _CiclistaService.UpdateCartao(cartaoNovo, id);
             return Ok(result);
         }
         return NotFound();
