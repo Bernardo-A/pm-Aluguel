@@ -79,20 +79,20 @@ namespace Aluguel.API.Services
                         var bodyTranca = JsonContent.Create(bicicleta);
                         var destranca = await HttpClient.PostAsync(equipamentoAddress + "/tranca/" + aluguel.TrancaId + "/destrancar/", bodyTranca);
                         destranca.EnsureSuccessStatusCode();
+                        var result = new AluguelViewModel()
+                        {
+                            CiclistaId = ciclista.Id,
+                            Id = dict.Count,
+                            TrancaInicio = tranca.Id,
+                            BicicletaId = tranca.Bicicleta.Id
+                        };
+                        dict.Add(dict.Count, result);
+                        return result;  
                     } else
                     {
                         return null;
                     }
                    
-                    var result = new AluguelViewModel()
-                    {
-                        CiclistaId = ciclista.Id,
-                        Id = dict.Count,
-                        TrancaInicio = tranca.Id,
-                        BicicletaId = tranca.Bicicleta.Id
-                    };
-                    dict.Add(dict.Count, result);
-                    return result;
                 }
             }
             return null;

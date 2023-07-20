@@ -14,7 +14,7 @@ namespace Aluguel.API.Services
         public List<CiclistaViewModel> GetAll();
         public CiclistaViewModel Activate(int id);
         public bool IsEmailRegistered(string email);
-        public Task<CiclistaViewModel> UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id);
+        public Task<CiclistaViewModel?> UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id);
     }
 
     public class CiclistaService : ICiclistaService
@@ -99,8 +99,8 @@ namespace Aluguel.API.Services
             });
 
             await HttpClient.PostAsync(externoAPI + "/enviarEmail", body);
-            if (ciclista != null) { return (ciclista); }
-            else { return null;  }
+            if (ciclista == null) { return null; }
+            else { return (ciclista); }
         }
 
         public CiclistaViewModel Activate (int id)
