@@ -73,7 +73,7 @@ namespace Aluguel.API.Services
 
                     response.EnsureSuccessStatusCode();
 
-                    if (tranca != null)
+                    if (tranca?.Bicicleta != null)
                     {
                         int bicicleta = tranca.Bicicleta.Id;
                         var bodyTranca = JsonContent.Create(bicicleta);

@@ -99,8 +99,7 @@ namespace Aluguel.API.Services
             });
 
             await HttpClient.PostAsync(externoAPI + "/enviarEmail", body);
-            if (ciclista == null) { return null; }
-            else { return (ciclista); }
+            return ciclista;
         }
 
         public CiclistaViewModel Activate (int id)
