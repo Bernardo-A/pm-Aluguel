@@ -133,12 +133,12 @@ public class CiclistaController : ControllerBase
 
     [HttpPut]
     [Route("/cartaoDeCredito/{id}")]
-    public IActionResult EditCard([FromBody] MeioDePagamentoViewModel cartaoNovo, int id)
+    public async Task<IActionResult> EditCard([FromBody] MeioDePagamentoViewModel cartaoNovo, int id)
     {
         _logger.LogInformation("Alterando cartão do ciclista...");
         if (_CiclistaService.Contains(id))
         {
-            var result = _CiclistaService.UpdateCartao(cartaoNovo, id);
+            var result = await _CiclistaService.UpdateCartao(cartaoNovo, id);
             return Ok(result);
         }
         return NotFound();
