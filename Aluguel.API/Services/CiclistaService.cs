@@ -14,7 +14,7 @@ namespace Aluguel.API.Services
         public List<CiclistaViewModel> GetAll();
         public CiclistaViewModel Activate(int id);
         public bool IsEmailRegistered(string email);
-        public Task<CiclistaViewModel> UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id);
+        public Task<CiclistaViewModel?> UpdateCartao(MeioDePagamentoViewModel cartaoNovo, int id);
     }
 
     public class CiclistaService : ICiclistaService

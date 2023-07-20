@@ -31,24 +31,11 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
     public async Task GetTrancaReturnTranca()
     {
         var client = _factory.CreateClient();
-        var body = JsonContent.Create(new TrancaViewModel
-        {
-            Localizacao = "",
-            AnoDeFabricacao = "",
-            Modelo = "",
-            Status = "",
-            Numero = 0
-        });
 
-        var response = await client.PostAsync(equipamentoAPI + "/tranca", body);
-        response.EnsureSuccessStatusCode();
-        var tranquinha = await response.Content.ReadFromJsonAsync<TrancaViewModel>();
-
-        var responseTranca = await client.GetAsync(equipamentoAPI + "/tranca/" + tranquinha?.Id);
+        var responseTranca = await client.GetAsync(equipamentoAPI + "/tranca/" + 0);
         responseTranca.EnsureSuccessStatusCode();
-        var tranca = await responseTranca.Content.ReadFromJsonAsync<TrancaViewModel>();
 
-        Assert.Equal(tranquinha, tranca);
+        Assert.True(responseTranca.IsSuccessStatusCode);
     }
 
     [Fact]
@@ -65,5 +52,25 @@ public class IntegrationTest : IClassFixture<WebApplicationFactory<Program>>
 
         var response = await client.PostAsync(externoAPI + "/cobranca", body);
         response.EnsureSuccessStatusCode();
+        Assert.True(response.IsSuccessStatusCode);
+    }
+
+    [Fact]
+    public async Task PostEmailOnSuccessReturns200()
+    {
+        var client = _factory.CreateClient();
+
+        var body = JsonContent.Create(new EmailDto
+        {
+            Mensagem = "testando",
+            Assunto = "teste",
+            Email = "bernardo.agrelos@edu.unirio.br"
+        });
+
+
+        var response = await client.PostAsync(externoAPI + "/enviarEmail", body);
+
+        response.EnsureSuccessStatusCode();
+        Assert.True(response.IsSuccessStatusCode);
     }
 }

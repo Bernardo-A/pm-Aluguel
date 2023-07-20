@@ -151,12 +151,12 @@ namespace Aluguel.API.Services
                     var tranca = await HttpClient.PostAsync(equipamentoAddress + "/tranca/" + aluguel.TrancaId + "/trancar/", bodyTranca);
                     tranca.EnsureSuccessStatusCode();
 
-                    var time = (value.DataDevolucao.Value - value.DataAluguel).TotalNanoseconds;
-                    if (time >= 2)
+                    var time = (value.DataDevolucao.Value - value.DataAluguel).TotalMinutes;
+                    if (time >= 120)
                     {
                         var body = JsonContent.Create(new CobrancaDto
                         {
-                            Valor = 10,
+                            Valor = (decimal)(5 *(time / 30)),
                             Ciclista = value.CiclistaId
                         });
 
